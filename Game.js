@@ -47,6 +47,7 @@ function criandoGamePad() {
     document.getElementById('btnPular').addEventListener('mousedown', () => simularTecla(' ', 'keydown'));
     document.getElementById('btnPular').addEventListener('mouseup', () => simularTecla(' ', 'keyup'));
 }
+
 function carregaSons() {
     const somMoeda = new Audio('assets/brackeys_platformer_assets/sounds/coin.wav');
     somMoeda.volume = 0.1;
@@ -54,11 +55,11 @@ function carregaSons() {
     const somPulo = new Audio('assets/brackeys_platformer_assets/sounds/jump.wav');
     somPulo.volume = 0.1;
 
-    // const somFase = new Audio('assets/background.mp3');
-    // somFase.volume = 0.3;
+    const somFase = new Audio('assets/background.mp3');
+    somFase.volume = 0.3;
 
-    // somFase.loop = true;
-    // somFase.play();
+    somFase.loop = true;
+    somFase.play();
 
     return { somMoeda, somPulo };
 }
@@ -78,6 +79,22 @@ function desenharMoedas(deltaTime) {
 function posicaoPadraoJogador() {
     jogador.x = 32;
     jogador.y = 450;
+}
+
+function finalizarJogo() {
+    function mostrarFimDeJogo() {
+        const tela = document.getElementById('telaFimDeJogo');
+        tela.classList.remove('hidden');
+    }
+
+    // Quando o jogador terminar o jogo
+    mostrarFimDeJogo(); // exemplo
+
+    // Botão jogar novamente
+    document.getElementById('btnJogarNovamente').addEventListener('click', () => {
+        document.getElementById('telaFimDeJogo').classList.add('hidden');
+        location.reload();
+    });
 }
 
 function colorirFundo() {
@@ -157,7 +174,7 @@ window.addEventListener('keyup', (e) => {
 
 posicaoPadraoJogador();
 iniciarFase(faseAtual);
-console.log(moedas);
+const tamanhoJogo = LEVELS.length;
 
 function gameLoop(tempoAtual) {
     let deltaTime = tempoAtual - ultimoTempo;
@@ -175,6 +192,9 @@ function gameLoop(tempoAtual) {
             moedasColetadas = 0;
             proximaFase = faseAtual + 1;
             faseAtual = proximaFase
+            if (proximaFase >= tamanhoJogo) {
+                finalizarJogo();
+            }
             iniciarFase(proximaFase);
         }
     }
