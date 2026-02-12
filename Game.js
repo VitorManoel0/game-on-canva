@@ -5,11 +5,11 @@ function carregaSons() {
     const somPulo = new Audio('assets/brackeys_platformer_assets/sounds/jump.wav');
     somPulo.volume = 0.1;
 
-    // const somFase = new Audio('assets/background.mp3');
-    // somFase.volume = 0.3;
+    const somFase = new Audio('assets/background.mp3');
+    somFase.volume = 0.3;
 
-    // somFase.loop = true;
-    // somFase.play();
+    somFase.loop = true;
+    somFase.play();
 
     return { somMoeda, somPulo };
 }
