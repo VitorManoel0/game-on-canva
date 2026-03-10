@@ -70,6 +70,7 @@ class Jogador {
     }
 
     atualizarFrame(deltaTime) {
+        if (jogoPausado) return; // Não atualizar se o jogo estiver pausado
         this.movimentacao();
         this.mudaSprite();
         this.aplicarGravidade();

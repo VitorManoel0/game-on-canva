@@ -5,13 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="css/style.css">
-    <script type="text/javascript" src="js/Jogador.js"></script>
-    <script type="text/javascript" src="js/Mapa.js"></script>
-    <script type="text/javascript" src="js/Tileset.js"></script>
-    <script type="text/javascript" src="js/Moeda.js"></script>
-    <script type="text/javascript" src="assets/levels/levels.js"></script>
-    <title>Canvas Exemplo</title>
-
+    
+    <title>Canvas Exemplo - Personagens</title>
 </head>
 
 <body>
@@ -19,14 +14,15 @@
         Seu navegador não suporta o elemento canvas.
     </canvas>
 
-     <div id="telaFimDeJogo" class="tela-fim hidden">
+    <div id="telaFimDeJogo" class="tela-fim hidden">
         <div class="conteudo-fim">
             <h1>🎉 PARABÉNS! 🎉</h1>
             <h2>Você finalizou o jogo!</h2>
+            <p>Conheceu todos os personagens!</p>
             <button id="btnJogarNovamente" class="btn-grande">🔄 Jogar Novamente</button>
         </div>
     </div>
-    
+
     <div class="controls">
         <button id="btnRecarregar">🔄 Recarregar Jogo</button>
 
@@ -35,9 +31,35 @@
             <button id="btnPular" class="btn-control">⬆️</button>
             <button id="btnDireita" class="btn-control">➡️</button>
         </div>
+        
+        <div style="text-align: center; margin-top: 20px; color: white; font-family: Arial;">
+            <p style="font-size: 18px; margin: 10px;">
+                💡 <strong>Como jogar:</strong><br>
+                Toque nos personagens com 💬 para conhecê-los!<br>
+                Encontre todos para avançar de fase!
+            </p>
+        </div>
     </div>
 
-    <script type="text/javascript" src="js/Game.js"></script>
+    <!-- ORDEM CRÍTICA DOS SCRIPTS - NÃO MUDE! -->
+    
+    <!-- 1. Classes básicas do jogo -->
+    <script type="text/javascript" src="Jogador.js"></script>
+    <script type="text/javascript" src="Mapa.js"></script>
+    <script type="text/javascript" src="Tileset.js"></script>
+    
+    <!-- 2. DADOS dos personagens (ANTES das classes que usam) -->
+    <script type="text/javascript" src="Personagens.js"></script>
+    
+    <!-- 3. Classes que USAM os dados -->
+    <script type="text/javascript" src="Personagem.js"></script>
+    <script type="text/javascript" src="DialogSystem.js"></script>
+    
+    <!-- 4. Levels (usa PERSONAGENS) -->
+    <script type="text/javascript" src="assets/levels/levels.js"></script>
+    
+    <!-- 5. Game principal - SEMPRE POR ÚLTIMO! -->
+    <script type="text/javascript" src="Game.js"></script>
 </body>
 
 </html>
