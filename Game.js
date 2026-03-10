@@ -10,32 +10,33 @@ function criandoGamePad() {
         document.dispatchEvent(evento);
     }
 
+    // Melhorado: com passive: false para prevenir zoom
     document.getElementById('btnEsquerda').addEventListener('touchstart', (e) => {
         e.preventDefault();
         simularTecla('a', 'keydown');
-    });
+    }, { passive: false });
     document.getElementById('btnEsquerda').addEventListener('touchend', (e) => {
         e.preventDefault();
         simularTecla('a', 'keyup');
-    });
+    }, { passive: false });
 
     document.getElementById('btnDireita').addEventListener('touchstart', (e) => {
         e.preventDefault();
         simularTecla('d', 'keydown');
-    });
+    }, { passive: false });
     document.getElementById('btnDireita').addEventListener('touchend', (e) => {
         e.preventDefault();
         simularTecla('d', 'keyup');
-    });
+    }, { passive: false });
 
     document.getElementById('btnPular').addEventListener('touchstart', (e) => {
         e.preventDefault();
         simularTecla(' ', 'keydown');
-    });
+    }, { passive: false });
     document.getElementById('btnPular').addEventListener('touchend', (e) => {
         e.preventDefault();
         simularTecla(' ', 'keyup');
-    });
+    }, { passive: false });
 
     document.getElementById('btnEsquerda').addEventListener('mousedown', () => simularTecla('a', 'keydown'));
     document.getElementById('btnEsquerda').addEventListener('mouseup', () => simularTecla('a', 'keyup'));
@@ -56,9 +57,20 @@ function carregaSons() {
 
     const somFase = new Audio('assets/background.mp3');
     somFase.volume = 0.3;
-
     somFase.loop = true;
-    somFase.play();
+    
+    // Melhorado: com tratamento de erro para mobile/linux
+    const playPromise = somFase.play();
+    if (playPromise !== undefined) {
+        playPromise.catch(err => {
+            console.log('Áudio bloqueado. Clique para ativar.');
+            // Tocar após primeiro clique
+            document.addEventListener('click', function enableAudio() {
+                somFase.play();
+                document.removeEventListener('click', enableAudio);
+            }, { once: true });
+        });
+    }
 
     return { somInteracao, somPulo };
 }
@@ -82,6 +94,27 @@ function desenharPersonagens(deltaTime) {
 function posicaoPadraoJogador() {
     jogador.x = 32;
     jogador.y = 450;
+    // Resetar velocidades se existirem
+    if (jogador.velocidadeX !== undefined) {
+        jogador.velocidadeX = 0;
+        jogador.velocidadeY = 0;
+    }
+}
+
+// NOVA FUNÇÃO: Congelar jogador completamente
+function congelarJogador() {
+    // Zerar velocidades
+    if (jogador.velocidadeX !== undefined) {
+        jogador.velocidadeX = 0;
+        jogador.velocidadeY = 0;
+    }
+    
+    // Limpar todos os inputs
+    teclado.cima = false;
+    teclado.baixo = false;
+    teclado.esquerda = false;
+    teclado.direita = false;
+    teclado.espaco = false;
 }
 
 function finalizarJogo() {
@@ -111,13 +144,18 @@ document.getElementById('btnRecarregar').addEventListener('click', () => {
     location.reload();
 });
 
-let canvas = document.getElementById("desenho1");
-let ctx = canvas.getContext("2d");
+const ctx = canvas.getContext("2d");
+
 let faseAtual = 0;
 let personagens = []; 
 let mapa_lvl;
+let jogoPausado = false;
+
+// OTIMIZAÇÃO: Sistema de tempo melhorado
 let ultimoTempo = 0;
-let jogoPausado = false; 
+const FPS_ALVO = 60;
+const DELTA_TIME_FIXO = 1000 / FPS_ALVO; // ~16.67ms
+const MAX_DELTA_TIME = 100; // Limitar saltos grandes
 
 const teclado = {
     cima: false,
@@ -137,22 +175,30 @@ const dialogSystem = new DialogSystem();
 
 criandoGamePad();
 
+// Melhorado: Ignorar teclas quando pausado + suporte a setas
 window.addEventListener('keydown', (e) => {
+    if (jogoPausado) return; // Ignorar quando pausado
+    
     const key = e.key;
     switch (key) {
         case 'd':
+        case 'ArrowRight': // Suporte a setas
             teclado.direita = true;
             break;
         case 'a':
+        case 'ArrowLeft':
             teclado.esquerda = true;
             break;
         case 'w':
+        case 'ArrowUp':
             teclado.cima = true;
             break;
         case 's':
+        case 'ArrowDown':
             teclado.baixo = true;
             break;
         case ' ':
+            e.preventDefault(); // Prevenir scroll
             teclado.espaco = true;
             break;
     }
@@ -162,15 +208,19 @@ window.addEventListener('keyup', (e) => {
     const key = e.key;
     switch (key) {
         case 'd':
+        case 'ArrowRight':
             teclado.direita = false;
             break;
         case 'a':
+        case 'ArrowLeft':
             teclado.esquerda = false;
             break;
         case 'w':
+        case 'ArrowUp':
             teclado.cima = false;
             break;
         case 's':
+        case 'ArrowDown':
             teclado.baixo = false;
             break;
         case ' ':
@@ -184,12 +234,29 @@ iniciarFase(faseAtual);
 const tamanhoJogo = LEVELS.length;
 
 function gameLoop(tempoAtual) {
+    // OTIMIZAÇÃO: Calcular deltaTime com limitação
     let deltaTime = tempoAtual - ultimoTempo;
+    
+    // Limitar para evitar saltos quando tab fica inativa (Linux)
+    if (deltaTime > MAX_DELTA_TIME) {
+        deltaTime = MAX_DELTA_TIME;
+    }
+    
+    // Se muito pequeno, pular frame
+    if (deltaTime < 1) {
+        requestAnimationFrame(gameLoop);
+        return;
+    }
+    
     ultimoTempo = tempoAtual;
+    
+    // OTIMIZAÇÃO: Usar deltaTime fixo para animações (mais suave)
+    const deltaTimeAnimacao = DELTA_TIME_FIXO;
+    
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     colorirFundo();
-    desenharPersonagens(deltaTime);
+    desenharPersonagens(deltaTimeAnimacao); // Usar deltaTime fixo
     mapa.desenharFase();
     
     // Só atualizar física se NÃO estiver pausado
@@ -216,15 +283,17 @@ function gameLoop(tempoAtual) {
             if (personagem.interagir(jogador)) {
                 personagensInteragidos++;
                 somInteracao.currentTime = 0;
-                somInteracao.play();
-                console.log("entrou");
+                somInteracao.play().catch(() => {}); // Evitar erro
+                console.log("Interagiu com personagem!");
                 
+                // MELHORADO: Pausar E congelar
                 jogoPausado = true;
+                congelarJogador();
             }
         });
     }
 
-    jogador.desenhar(deltaTime);
+    jogador.desenhar(deltaTimeAnimacao); // Usar deltaTime fixo
 
     // Mostrar contador de personagens interagidos
     ctx.fillStyle = "white";

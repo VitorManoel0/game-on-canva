@@ -12,7 +12,7 @@ class Jogador {
         this.teclado = teclado;
         this.x = 0;
         this.y = 0;
-        this.velocidade = 2;
+        this.velocidade = 3;
 
         // Configuração da animação
         this.frameAtual = 0;
@@ -25,8 +25,8 @@ class Jogador {
 
         // Física do pulo
         this.velocidadeY = 0;
-        this.gravidade = 0.1;
-        this.forcaPulo = -4;
+        this.gravidade = 0.4;
+        this.forcaPulo = -8;
         this.noChao = false;
         this.alturaChao = ctx.canvas.height - this.altura; // Posição do chão
 

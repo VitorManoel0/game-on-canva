@@ -53,7 +53,7 @@ class DialogSystem {
             </div>
         `;
 
-        document.body.appendChild(overlay);
+        document.body.insertBefore(overlay, document.body.firstChild);
         this.overlayElement = overlay;
 
         // Adicionar event listeners
