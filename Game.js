@@ -1,51 +1,57 @@
 function criandoGamePad() {
     function simularTecla(codigo, tipo) {
+        const mapaTecla = {
+            'a': { code: 'KeyA', keyCode: 65 },
+            'd': { code: 'KeyD', keyCode: 68 },
+            ' ': { code: 'Space', keyCode: 32 }
+        };
+
+        const tecla = mapaTecla[codigo] || mapaTecla[' '];
         const evento = new KeyboardEvent(tipo, {
             key: codigo,
-            code: codigo === 'a' ? 'KeyA' : codigo === 'd' ? 'KeyD' : 'Space',
-            keyCode: codigo === 'a' ? 65 : codigo === 'd' ? 68 : 32,
-            which: codigo === 'a' ? 65 : codigo === 'd' ? 68 : 32,
+            code: tecla.code,
+            keyCode: tecla.keyCode,
+            which: tecla.keyCode,
             bubbles: true
         });
         document.dispatchEvent(evento);
     }
 
-    // Melhorado: com passive: false para prevenir zoom
-    document.getElementById('btnEsquerda').addEventListener('touchstart', (e) => {
-        e.preventDefault();
-        simularTecla('a', 'keydown');
-    }, { passive: false });
-    document.getElementById('btnEsquerda').addEventListener('touchend', (e) => {
-        e.preventDefault();
-        simularTecla('a', 'keyup');
-    }, { passive: false });
+    function bindVirtualButton(buttonId, tecla) {
+        const botao = document.getElementById(buttonId);
+        if (!botao) return;
 
-    document.getElementById('btnDireita').addEventListener('touchstart', (e) => {
-        e.preventDefault();
-        simularTecla('d', 'keydown');
-    }, { passive: false });
-    document.getElementById('btnDireita').addEventListener('touchend', (e) => {
-        e.preventDefault();
-        simularTecla('d', 'keyup');
-    }, { passive: false });
+        const pressionar = (e) => {
+            e.preventDefault();
+            simularTecla(tecla, 'keydown');
+        };
 
-    document.getElementById('btnPular').addEventListener('touchstart', (e) => {
-        e.preventDefault();
-        simularTecla(' ', 'keydown');
-    }, { passive: false });
-    document.getElementById('btnPular').addEventListener('touchend', (e) => {
-        e.preventDefault();
-        simularTecla(' ', 'keyup');
-    }, { passive: false });
+        const soltar = (e) => {
+            e.preventDefault();
+            simularTecla(tecla, 'keyup');
+        };
 
-    document.getElementById('btnEsquerda').addEventListener('mousedown', () => simularTecla('a', 'keydown'));
-    document.getElementById('btnEsquerda').addEventListener('mouseup', () => simularTecla('a', 'keyup'));
+        const listenerOptions = { passive: false };
 
-    document.getElementById('btnDireita').addEventListener('mousedown', () => simularTecla('d', 'keydown'));
-    document.getElementById('btnDireita').addEventListener('mouseup', () => simularTecla('d', 'keyup'));
+        // Pointer events (unificado para touch, caneta e mouse)
+        botao.addEventListener('pointerdown', pressionar, listenerOptions);
+        botao.addEventListener('pointerup', soltar, listenerOptions);
+        botao.addEventListener('pointercancel', soltar, listenerOptions);
+        botao.addEventListener('pointerleave', soltar, listenerOptions);
 
-    document.getElementById('btnPular').addEventListener('mousedown', () => simularTecla(' ', 'keydown'));
-    document.getElementById('btnPular').addEventListener('mouseup', () => simularTecla(' ', 'keyup'));
+        // Fallback para navegadores antigos
+        botao.addEventListener('touchstart', pressionar, listenerOptions);
+        botao.addEventListener('touchend', soltar, listenerOptions);
+        botao.addEventListener('mousedown', pressionar, listenerOptions);
+        botao.addEventListener('mouseup', soltar, listenerOptions);
+
+        botao.addEventListener('contextmenu', (e) => e.preventDefault(), listenerOptions);
+    }
+
+    bindVirtualButton('btnEsquerda', 'a');
+    bindVirtualButton('btnDireita', 'd');
+    bindVirtualButton('btnPular', ' ');
+    bindVirtualButton('btnCima', ' ');
 }
 
 function carregaSons() {
@@ -58,7 +64,7 @@ function carregaSons() {
     const somFase = new Audio('assets/background.mp3');
     somFase.volume = 0.3;
     somFase.loop = true;
-    
+
     // Melhorado: com tratamento de erro para mobile/linux
     const playPromise = somFase.play();
     if (playPromise !== undefined) {
@@ -80,7 +86,7 @@ function iniciarFase(fase) {
         const dadosPersonagem = PERSONAGENS[p.categoria][p.nome];
         return new Personagem(ctx, p.x, p.y, dadosPersonagem, p.nome, p.categoria);
     });
-    
+
     mapa_lvl = LEVELS[fase].mapa;
     mapa.carregarFase(mapa_lvl);
 }
@@ -108,7 +114,7 @@ function congelarJogador() {
         jogador.velocidadeX = 0;
         jogador.velocidadeY = 0;
     }
-    
+
     // Limpar todos os inputs
     teclado.cima = false;
     teclado.baixo = false;
@@ -147,7 +153,7 @@ document.getElementById('btnRecarregar').addEventListener('click', () => {
 const ctx = canvas.getContext("2d");
 
 let faseAtual = 0;
-let personagens = []; 
+let personagens = [];
 let mapa_lvl;
 let jogoPausado = false;
 
@@ -178,7 +184,7 @@ criandoGamePad();
 // Melhorado: Ignorar teclas quando pausado + suporte a setas
 window.addEventListener('keydown', (e) => {
     if (jogoPausado) return; // Ignorar quando pausado
-    
+
     const key = e.key;
     switch (key) {
         case 'd':
@@ -236,29 +242,26 @@ const tamanhoJogo = LEVELS.length;
 function gameLoop(tempoAtual) {
     // OTIMIZAÇÃO: Calcular deltaTime com limitação
     let deltaTime = tempoAtual - ultimoTempo;
-    
+
     // Limitar para evitar saltos quando tab fica inativa (Linux)
     if (deltaTime > MAX_DELTA_TIME) {
         deltaTime = MAX_DELTA_TIME;
     }
-    
+
     // Se muito pequeno, pular frame
     if (deltaTime < 1) {
         requestAnimationFrame(gameLoop);
         return;
     }
-    
+
     ultimoTempo = tempoAtual;
-    
-    // OTIMIZAÇÃO: Usar deltaTime fixo para animações (mais suave)
-    const deltaTimeAnimacao = DELTA_TIME_FIXO;
-    
+
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     colorirFundo();
-    desenharPersonagens(deltaTimeAnimacao); // Usar deltaTime fixo
+    desenharPersonagens(deltaTime);
     mapa.desenharFase();
-    
+
     // Só atualizar física se NÃO estiver pausado
     if (!jogoPausado) {
         mapa.verificarColisao(jogador);
@@ -267,9 +270,9 @@ function gameLoop(tempoAtual) {
             if (personagensInteragidos === personagens.length) {
                 posicaoPadraoJogador();
                 personagensInteragidos = 0;
-                proximaFase = faseAtual + 1;
+                const proximaFase = faseAtual + 1;
                 faseAtual = proximaFase;
-                
+
                 if (proximaFase >= tamanhoJogo) {
                     finalizarJogo();
                 } else {
@@ -283,9 +286,9 @@ function gameLoop(tempoAtual) {
             if (personagem.interagir(jogador)) {
                 personagensInteragidos++;
                 somInteracao.currentTime = 0;
-                somInteracao.play().catch(() => {}); // Evitar erro
+                somInteracao.play().catch(() => { }); // Evitar erro
                 console.log("Interagiu com personagem!");
-                
+
                 // MELHORADO: Pausar E congelar
                 jogoPausado = true;
                 congelarJogador();
@@ -293,7 +296,7 @@ function gameLoop(tempoAtual) {
         });
     }
 
-    jogador.desenhar(deltaTimeAnimacao); // Usar deltaTime fixo
+    jogador.desenhar(deltaTime, DELTA_TIME_FIXO);
 
     // Mostrar contador de personagens interagidos
     ctx.fillStyle = "white";
@@ -328,3 +331,9 @@ function gameLoop(tempoAtual) {
 }
 
 requestAnimationFrame(gameLoop);
+
+document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) {
+        ultimoTempo = performance.now();
+    }
+});

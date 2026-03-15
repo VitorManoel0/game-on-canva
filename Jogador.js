@@ -13,6 +13,7 @@ class Jogador {
         this.x = 0;
         this.y = 0;
         this.velocidade = 3;
+        this.deltaBase = 1000 / 60; // Base de 60 FPS para normalização
 
         // Configuração da animação
         this.frameAtual = 0;
@@ -45,8 +46,8 @@ class Jogador {
     }
 
     aplicarGravidade() {
-        this.velocidadeY += this.gravidade;
-        this.y += this.velocidadeY;
+        this.velocidadeY += this.gravidade * this.deltaScale;
+        this.y += this.velocidadeY * this.deltaScale;
 
         if (this.y >= this.alturaChao) {
             this.y = this.alturaChao;
@@ -58,19 +59,26 @@ class Jogador {
     movimentacao() {
         if (this.teclado.direita) {
             if (this.x < this.ctx.canvas.width - this.largura)
-                this.x += this.velocidade;
+                this.x += this.velocidade * this.deltaScale;
         }
         if (this.teclado.esquerda) {
             if (this.x > 0)
-                this.x -= this.velocidade;
+                this.x -= this.velocidade * this.deltaScale;
         }
         if (this.teclado.cima || this.teclado.espaco) {
             this.pular();
         }
+
+        // Limites após normalização por delta
+        if (this.x < 0) this.x = 0;
+        const limiteDireito = this.ctx.canvas.width - this.largura;
+        if (this.x > limiteDireito) this.x = limiteDireito;
     }
 
-    atualizarFrame(deltaTime) {
+    atualizarFrame(deltaTime, deltaReferencia = this.deltaBase) {
         if (jogoPausado) return; // Não atualizar se o jogo estiver pausado
+
+        this.deltaScale = Math.max(0.5, Math.min(2, deltaTime / deltaReferencia));
         this.movimentacao();
         this.mudaSprite();
         this.aplicarGravidade();
@@ -123,8 +131,8 @@ class Jogador {
         }
     }
 
-    desenhar(deltaTime) {
-        this.atualizarFrame(deltaTime);
+    desenhar(deltaTime, deltaReferencia) {
+        this.atualizarFrame(deltaTime, deltaReferencia);
 
         this.ctx.save();
 

@@ -1,407 +1,11 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <link rel="stylesheet" href="css/style.css">
     <title>Jogo de Plataforma - Personagens</title>
-    
-    <style>
-        @font-face {
-            font-family: 'ArcadeFont';
-            src: url('./font/ARCADE_N.TTF') format('truetype');
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: Arial, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            overflow: hidden;
-            touch-action: manipulation;
-        }
-
-        #dialogOverlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background: rgba(0, 0, 0, 0.8);
-            z-index: 9999;
-        }
-
-        #dialogOverlay.hidden {
-            display: none;
-        }
-
-
-        /* ========== LAYOUT DESKTOP ========== */
-        .desktop-layout {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            padding: 20px;
-            gap: 40px;
-        }
-
-        .game-container {
-            background: #000;
-            padding: 20px;
-            border-radius: 15px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
-            border: 4px solid #333;
-        }
-
-        #desenho1 {
-            display: block;
-            border: 3px solid #FFD700;
-            border-radius: 5px;
-            background: #000;
-        }
-
-        .tutorial-panel {
-            background: rgba(255, 255, 255, 0.95);
-            padding: 30px;
-            border-radius: 15px;
-            max-width: 300px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-        }
-
-        .tutorial-panel h2 {
-            font-family: 'ArcadeFont', sans-serif;
-            color: #667eea;
-            margin-bottom: 20px;
-            font-size: 24px;
-            text-align: center;
-        }
-
-        .tutorial-item {
-            margin: 15px 0;
-            padding: 10px;
-            background: #f0f0f0;
-            border-radius: 8px;
-            border-left: 4px solid #667eea;
-        }
-
-        .tutorial-item .key {
-            display: inline-block;
-            background: #333;
-            color: white;
-            padding: 5px 10px;
-            border-radius: 5px;
-            font-weight: bold;
-            margin-right: 10px;
-            font-family: 'Courier New', monospace;
-        }
-
-        .tutorial-item .action {
-            color: #333;
-            font-weight: bold;
-        }
-
-        .game-info {
-            margin-top: 20px;
-            padding: 15px;
-            background: #fff3cd;
-            border-radius: 8px;
-            border: 2px solid #ffc107;
-        }
-
-        .game-info p {
-            color: #856404;
-            font-size: 14px;
-            line-height: 1.6;
-        }
-
-        /* ========== LAYOUT MOBILE (GAMEBOY) ========== */
-        .mobile-layout {
-            display: none;
-            flex-direction: column;
-            height: 100vh;
-            background: #8B8B8B; /* Cinza GameBoy */
-            padding: 20px;
-        }
-
-        .gameboy-header {
-            text-align: center;
-            color: #2C2C2C;
-            font-family: 'ArcadeFont', sans-serif;
-            margin-bottom: 10px;
-        }
-
-        .gameboy-screen {
-            background: #2C2C2C;
-            padding: 15px;
-            border-radius: 10px;
-            box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.5);
-            margin-bottom: 20px;
-        }
-
-        .gameboy-controls {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            padding: 20px;
-            background: linear-gradient(135deg, #A0A0A0, #8B8B8B);
-            border-radius: 15px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-        }
-
-        .dpad-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .dpad {
-            position: relative;
-            width: 150px;
-            height: 150px;
-        }
-
-        .dpad-button {
-            position: absolute;
-            background: #2C2C2C;
-            border: 3px solid #000;
-            color: white;
-            font-size: 24px;
-            cursor: pointer;
-            user-select: none;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-        }
-
-        .dpad-button:active {
-            background: #1C1C1C;
-            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5);
-        }
-
-        .dpad-left {
-            width: 50px;
-            height: 50px;
-            left: 0;
-            top: 50px;
-            border-radius: 8px 0 0 8px;
-        }
-
-        .dpad-right {
-            width: 50px;
-            height: 50px;
-            right: 0;
-            top: 50px;
-            border-radius: 0 8px 8px 0;
-        }
-
-        .dpad-up {
-            width: 50px;
-            height: 50px;
-            left: 50px;
-            top: 0;
-            border-radius: 8px 8px 0 0;
-        }
-
-        .dpad-center {
-            width: 50px;
-            height: 50px;
-            left: 50px;
-            top: 50px;
-            background: #3C3C3C;
-            border-radius: 50%;
-        }
-
-        .action-buttons {
-            display: flex;
-            gap: 15px;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .action-button {
-            width: 70px;
-            height: 70px;
-            border-radius: 50%;
-            background: #8B0000;
-            border: 4px solid #5C0000;
-            color: white;
-            font-size: 28px;
-            cursor: pointer;
-            user-select: none;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
-            font-weight: bold;
-        }
-
-        .action-button:active {
-            background: #6B0000;
-            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5);
-        }
-
-        .action-button.jump {
-            background: #FFD700;
-            border-color: #B8860B;
-        }
-
-        .action-button.jump:active {
-            background: #DAA520;
-        }
-
-        /* ========== BOTÕES COMUNS ========== */
-        #btnRecarregar {
-            position: fixed;
-            top: 10px;
-            right: 10px;
-            background: #FF6B6B;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: bold;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-            z-index: 1000;
-        }
-
-        #btnRecarregar:hover {
-            background: #FF5252;
-        }
-
-        /* ========== TELA DE FIM DE JOGO ========== */
-        .tela-fim {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.9);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 2000;
-        }
-
-        .tela-fim.hidden {
-            display: none;
-        }
-
-        .conteudo-fim {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            padding: 40px;
-            border-radius: 20px;
-            text-align: center;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
-            animation: slideIn 0.5s ease-out;
-        }
-
-        @keyframes slideIn {
-            from {
-                transform: scale(0.5);
-                opacity: 0;
-            }
-            to {
-                transform: scale(1);
-                opacity: 1;
-            }
-        }
-
-        .conteudo-fim h1 {
-            font-family: 'ArcadeFont', sans-serif;
-            font-size: 48px;
-            color: #FFD700;
-            margin: 0 0 15px 0;
-            text-shadow: 3px 3px 0px rgba(0, 0, 0, 0.3);
-        }
-
-        .conteudo-fim h2 {
-            font-family: 'ArcadeFont', sans-serif;
-            font-size: 28px;
-            color: white;
-            margin: 0 0 10px 0;
-        }
-
-        .conteudo-fim p {
-            color: white;
-            font-size: 18px;
-            margin: 10px 0 20px 0;
-        }
-
-        .btn-grande {
-            font-family: 'ArcadeFont', sans-serif;
-            font-size: 20px;
-            padding: 15px 40px;
-            background: #FFD700;
-            border: 3px solid #FFA500;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: all 0.3s;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-        }
-
-        .btn-grande:hover {
-            background: #FFA500;
-            transform: scale(1.05);
-        }
-
-        /* ========== MEDIA QUERIES ========== */
-        @media (max-width: 768px) {
-            .desktop-layout {
-                display: none !important;
-            }
-
-            .mobile-layout {
-                display: flex !important;
-            }
-
-            #desenho1 {
-                width: 100%;
-                height: auto;
-                max-height: 40vh;
-            }
-
-            .gameboy-header h1 {
-                font-size: 24px;
-            }
-            .dialog-left {
-                flex: 0 0 auto; /* remover o 280px fixo */
-            }
-
-            .dialog-container {
-                padding: 15px;
-                max-height: 90vh;
-                overflow-y: auto; /* permitir scroll se necessário */
-            }
-        }
-
-        @media (min-width: 769px) {
-            .desktop-layout {
-                display: flex !important;
-            }
-
-            .mobile-layout {
-                display: none !important;
-            }
-
-            .controls,
-            .game-buttons {
-                display: none !important;
-            }
-        }
-        
-
-    </style>
 </head>
 
 <body>
@@ -409,24 +13,24 @@
     <div class="desktop-layout">
         <div class="tutorial-panel">
             <h2>🎮 CONTROLES</h2>
-            
+
             <div class="tutorial-item">
                 <span class="key">A</span>
                 <span class="key">←</span>
                 <span class="action">Mover Esquerda</span>
             </div>
-            
+
             <div class="tutorial-item">
                 <span class="key">D</span>
                 <span class="key">→</span>
                 <span class="action">Mover Direita</span>
             </div>
-            
+
             <div class="tutorial-item">
                 <span class="key">ESPAÇO</span>
                 <span class="action">Pular</span>
             </div>
-            
+
             <div class="game-info">
                 <p>
                     <strong>💡 Objetivo:</strong><br>
@@ -459,7 +63,6 @@
                     <div class="dpad-button dpad-left" id="btnEsquerda">⬅</div>
                     <div class="dpad-button dpad-right" id="btnDireita">➡</div>
                     <div class="dpad-button dpad-up" id="btnCima">⬆</div>
-                    <div class="dpad-center"></div>
                 </div>
             </div>
 
@@ -491,18 +94,13 @@
 
         if (isMobile) {
             canvas = document.getElementById('desenho1-mobile');
-            // Ajustar tamanho do canvas para mobile
-            const screenWidth = window.innerWidth - 50;
-            const aspectRatio = 512 / 800;
-            canvas.style.width = screenWidth + 'px';
-            canvas.style.height = (screenWidth * aspectRatio) + 'px';
         } else {
             canvas = document.getElementById('desenho1');
         }
 
         // Sobrescrever getElementById para retornar o canvas correto
         const originalGetElementById = document.getElementById.bind(document);
-        document.getElementById = function(id) {
+        document.getElementById = function (id) {
             if (id === 'desenho1') {
                 return canvas;
             }
@@ -520,4 +118,5 @@
     <script type="text/javascript" src="assets/levels/levels.js"></script>
     <script type="text/javascript" src="Game.js"></script>
 </body>
+
 </html>

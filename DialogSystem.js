@@ -38,9 +38,15 @@ class DialogSystem {
                                 <p id="textoFala" class="texto-fala"></p>
                             </div>
                             <div class="dialog-controls">
-                                <button id="btnAnterior" class="btn-nav">⬅ Anterior</button>
+                                <button id="btnAnterior" class="btn-nav" aria-label="Fala anterior">
+                                    <span class="btn-nav-icon" aria-hidden="true">←</span>
+                                    <span class="btn-nav-text">Anterior</span>
+                                </button>
                                 <span id="indicadorFala" class="indicador-fala">1/1</span>
-                                <button id="btnProximo" class="btn-nav">Próximo ➡</button>
+                                <button id="btnProximo" class="btn-nav" aria-label="Próxima fala">
+                                    <span class="btn-nav-text">Próximo</span>
+                                    <span class="btn-nav-icon" aria-hidden="true">→</span>
+                                </button>
                             </div>
                         </div>
                         
