@@ -106,7 +106,13 @@ function desenharPersonagens(deltaTime) {
 
 function posicaoPadraoJogador() {
     jogador.x = 32;
-    jogador.y = 450;
+    jogador.y = (15 * 32) - jogador.altura; // 448: topo do chão inicial
+
+    if (jogador.xAnterior !== undefined) {
+        jogador.xAnterior = jogador.x;
+        jogador.yAnterior = jogador.y;
+    }
+
     // Resetar velocidades se existirem
     if (jogador.velocidadeX !== undefined) {
         jogador.velocidadeX = 0;
@@ -501,6 +507,7 @@ function gameLoop(tempoAtual) {
     desenharFogoHazard();
 
     if (!jogoPausado) {
+        jogador.atualizar(deltaTime, DELTA_TIME_FIXO);
         mapa.verificarColisao(jogador);
 
         if (jogadorEncostouNoFogo()) {
@@ -535,7 +542,7 @@ function gameLoop(tempoAtual) {
         });
     }
 
-    jogador.desenhar(deltaTime, DELTA_TIME_FIXO);
+    jogador.desenhar();
 
     ctx.fillStyle = "white";
     ctx.strokeStyle = "black";

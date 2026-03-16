@@ -47,47 +47,65 @@ class Mapa {
         jogador.noChao = false;
 
         for (let plataforma of this.plataformas) {
+            const jogadorX = jogador.x;
+            const jogadorY = jogador.y;
+            const jogadorXA = jogador.xAnterior ?? jogador.x;
+            const jogadorYA = jogador.yAnterior ?? jogador.y;
+
+            const sobrepoeHorizontalmente =
+                jogadorX + jogador.largura > plataforma.x &&
+                jogadorX < plataforma.x + plataforma.largura;
+
+            const sobrepoeVerticalmente =
+                jogadorY + jogador.altura > plataforma.y &&
+                jogadorY < plataforma.y + plataforma.altura;
+
             // Verifica colisão no eixo Y (em cima da plataforma)
-            if (jogador.x + jogador.largura > plataforma.x &&
-                jogador.x < plataforma.x + plataforma.largura &&
-                jogador.y + jogador.altura > plataforma.y &&
-                jogador.y + jogador.altura <= plataforma.y + 10 &&
+            const peAnterior = jogadorYA + jogador.altura;
+            const peAtual = jogadorY + jogador.altura;
+            const cruzouTopoDaPlataforma = peAnterior <= plataforma.y && peAtual >= plataforma.y;
+
+            if (sobrepoeHorizontalmente &&
+                cruzouTopoDaPlataforma &&
                 jogador.velocidadeY >= 0) {
 
                 jogador.y = plataforma.y - jogador.altura;
                 jogador.velocidadeY = 0;
                 jogador.noChao = true;
+                continue;
             }
 
             // Colisão com o teto
-            if (jogador.x + jogador.largura > plataforma.x &&
-                jogador.x < plataforma.x + plataforma.largura &&
-                jogador.y < plataforma.y + plataforma.altura &&
-                jogador.y >= plataforma.y + plataforma.altura - 10 &&
+            const topoAnterior = jogadorYA;
+            const topoAtual = jogadorY;
+            const cruzouBaseDaPlataforma =
+                topoAnterior >= plataforma.y + plataforma.altura &&
+                topoAtual <= plataforma.y + plataforma.altura;
+
+            if (sobrepoeHorizontalmente &&
+                cruzouBaseDaPlataforma &&
                 jogador.velocidadeY < 0) {
 
                 jogador.y = plataforma.y + plataforma.altura;
                 jogador.velocidadeY = 0;
+                continue;
             }
 
             // Colisão lateral esquerda
-            if (jogador.x < plataforma.x + plataforma.largura &&
-                jogador.x + jogador.largura > plataforma.x &&
-                jogador.y + jogador.altura > plataforma.y + 5 &&
-                jogador.y < plataforma.y + plataforma.altura - 5) {
+            if (sobrepoeVerticalmente &&
+                jogadorX < plataforma.x + plataforma.largura &&
+                jogadorX + jogador.largura > plataforma.x) {
 
-                if (jogador.x > plataforma.x) {
+                if (jogadorXA >= plataforma.x + plataforma.largura && jogadorX < plataforma.x + plataforma.largura) {
                     jogador.x = plataforma.x + plataforma.largura;
+                    continue;
                 }
-            }
 
-            // Colisão lateral direita
-            if (jogador.x + jogador.largura > plataforma.x &&
-                jogador.x < plataforma.x &&
-                jogador.y + jogador.altura > plataforma.y + 5 &&
-                jogador.y < plataforma.y + plataforma.altura - 5) {
-
-                jogador.x = plataforma.x - jogador.largura;
+                // Colisão lateral direita
+                if (jogadorXA + jogador.largura <= plataforma.x && jogadorX + jogador.largura > plataforma.x) {
+                    jogador.x = plataforma.x - jogador.largura;
+                    continue;
+                }
             }
         }
     }
@@ -105,4 +123,5 @@ class Mapa {
 
     }
 }
+
 

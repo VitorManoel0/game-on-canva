@@ -14,6 +14,9 @@ class Jogador {
         this.y = 0;
         this.velocidade = 3;
         this.deltaBase = 1000 / 60; // Base de 60 FPS para normalização
+        this.deltaScale = 1;
+        this.xAnterior = 0;
+        this.yAnterior = 0;
 
         // Configuração da animação
         this.frameAtual = 0;
@@ -79,6 +82,10 @@ class Jogador {
         if (jogoPausado) return; // Não atualizar se o jogo estiver pausado
 
         this.deltaScale = Math.max(0.5, Math.min(2, deltaTime / deltaReferencia));
+
+        this.xAnterior = this.x;
+        this.yAnterior = this.y;
+
         this.movimentacao();
         this.mudaSprite();
         this.aplicarGravidade();
@@ -93,6 +100,10 @@ class Jogador {
             }
             this.ultimoTempo = 0;
         }
+    }
+
+    atualizar(deltaTime, deltaReferencia = this.deltaBase) {
+        this.atualizarFrame(deltaTime, deltaReferencia);
     }
 
     mudaSprite() {
@@ -131,9 +142,7 @@ class Jogador {
         }
     }
 
-    desenhar(deltaTime, deltaReferencia) {
-        this.atualizarFrame(deltaTime, deltaReferencia);
-
+    desenhar() {
         this.ctx.save();
 
         let posIniX = this.largura * this.frameAtual;
