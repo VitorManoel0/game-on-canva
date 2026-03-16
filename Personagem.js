@@ -16,7 +16,7 @@ class Personagem {
         this.totalFrames = 4; // Ajuste conforme seu sprite
         this.tempoFrame = 200;
         this.ultimoTempo = 0;
-        this.escala = 2;
+        this.escala = 1;
         this.show = true;
         this.interagido = false;
 

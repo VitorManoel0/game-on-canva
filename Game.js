@@ -89,6 +89,13 @@ function iniciarFase(fase) {
 
     mapa_lvl = LEVELS[fase].mapa;
     mapa.carregarFase(mapa_lvl);
+
+    carregarBackgroundFase(fase);
+    configurarFogoFase(fase);
+
+    if (dialogSystem && typeof dialogSystem.aplicarPaleta === 'function') {
+        dialogSystem.aplicarPaleta(LEVELS[fase].dialogPalette);
+    }
 }
 
 function desenharPersonagens(deltaTime) {
@@ -107,20 +114,18 @@ function posicaoPadraoJogador() {
     }
 }
 
-// NOVA FUNÇÃO: Congelar jogador completamente
-function congelarJogador() {
-    // Zerar velocidades
-    if (jogador.velocidadeX !== undefined) {
-        jogador.velocidadeX = 0;
-        jogador.velocidadeY = 0;
-    }
+function reiniciarFaseAtual() {
+    personagensInteragidos = 0;
+    jogoPausado = false;
 
-    // Limpar todos os inputs
     teclado.cima = false;
     teclado.baixo = false;
     teclado.esquerda = false;
     teclado.direita = false;
     teclado.espaco = false;
+
+    posicaoPadraoJogador();
+    iniciarFase(faseAtual);
 }
 
 function finalizarJogo() {
@@ -137,13 +142,219 @@ function finalizarJogo() {
     });
 }
 
+function carregarBackgroundFase(fase) {
+    const faseConfig = LEVELS[fase] || {};
+    const caminhoBackground = faseConfig.background;
+
+    if (!caminhoBackground) {
+        backgroundAtual = null;
+        return;
+    }
+
+    const imagem = new Image();
+    imagem.src = caminhoBackground;
+    imagem.onload = () => {
+        backgroundAtual = imagem;
+    };
+    imagem.onerror = () => {
+        console.warn('Não foi possível carregar background da fase:', caminhoBackground);
+        backgroundAtual = null;
+    };
+}
+
 function colorirFundo() {
-    let gradiente = ctx.createLinearGradient(0, 0, 0, canvas.height);
+    if (backgroundAtual && backgroundAtual.complete) {
+        ctx.drawImage(backgroundAtual, 0, 0, canvas.width, canvas.height);
+        return;
+    }
+
+    // Fallback seguro enquanto a imagem não carrega
+    const gradiente = ctx.createLinearGradient(0, 0, 0, canvas.height);
     gradiente.addColorStop(0, '#FFB6C1');
     gradiente.addColorStop(0.5, '#FF69B4');
     gradiente.addColorStop(1, '#000000');
     ctx.fillStyle = gradiente;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
+}
+
+function configurarFogoFase(fase) {
+    const configFogo = LEVELS[fase]?.fireHazard;
+
+    if (!configFogo || !configFogo.enabled) {
+        fogoHazard.enabled = false;
+        fogoHazard.active = false;
+        fogoHazard.zones = [];
+        fogoHazard.zoneStates = [];
+        return;
+    }
+
+    fogoHazard.enabled = true;
+    fogoHazard.active = false;
+    fogoHazard.intervalMs = configFogo.intervalMs ?? 10000;
+    fogoHazard.durationMs = configFogo.durationMs ?? 5000;
+    fogoHazard.flameHeight = configFogo.flameHeight ?? 24;
+    fogoHazard.pixelSize = configFogo.pixelSize ?? 4;
+    fogoHazard.baseIntensity = configFogo.baseIntensity ?? 28;
+    fogoHazard.minDecay = configFogo.minDecay ?? 1;
+    fogoHazard.maxDecay = configFogo.maxDecay ?? 3;
+    fogoHazard.drawThreshold = configFogo.drawThreshold ?? 2;
+    fogoHazard.zones = configFogo.zones || [];
+    fogoHazard.proximaAtivacao = performance.now() + fogoHazard.intervalMs;
+    fogoHazard.desativaEm = 0;
+
+    inicializarDoomFireZones();
+}
+
+function atualizarFogoHazard(tempoAtual) {
+    if (!fogoHazard.enabled) return;
+
+    if (!fogoHazard.active && tempoAtual >= fogoHazard.proximaAtivacao) {
+        fogoHazard.active = true;
+        fogoHazard.desativaEm = tempoAtual + fogoHazard.durationMs;
+
+        for (const zoneState of fogoHazard.zoneStates) {
+            zoneState.intensidades.fill(0);
+        }
+
+        return;
+    }
+
+    if (fogoHazard.active && tempoAtual >= fogoHazard.desativaEm) {
+        fogoHazard.active = false;
+        fogoHazard.proximaAtivacao = tempoAtual + fogoHazard.intervalMs;
+    }
+
+    if (fogoHazard.active) {
+        atualizarDoomFire();
+    }
+}
+
+function desenharFogoHazard() {
+    if (!fogoHazard.enabled || !fogoHazard.active) return;
+
+    for (const zoneState of fogoHazard.zoneStates) {
+        const { zone, intensidades, colunas, linhas, pixelSize } = zoneState;
+        const topoY = zone.y + zone.height - linhas * pixelSize;
+
+        for (let y = 0; y < linhas; y++) {
+            for (let x = 0; x < colunas; x++) {
+                const intensidade = intensidades[(y * colunas) + x];
+                if (intensidade <= fogoHazard.drawThreshold) continue;
+
+                ctx.fillStyle = fogoHazard.paleta[intensidade];
+                ctx.fillRect(
+                    zone.x + (x * pixelSize),
+                    topoY + (y * pixelSize),
+                    pixelSize,
+                    pixelSize
+                );
+            }
+        }
+    }
+}
+
+function inicializarDoomFireZones() {
+    fogoHazard.zoneStates = fogoHazard.zones.map(zone => {
+        const pixelSize = fogoHazard.pixelSize;
+        const alturaVisual = zone.height + fogoHazard.flameHeight;
+        const colunas = Math.ceil(zone.width / pixelSize);
+        const linhas = Math.ceil(alturaVisual / pixelSize);
+
+        return {
+            zone,
+            pixelSize,
+            colunas,
+            linhas,
+            intensidades: new Uint8Array(colunas * linhas)
+        };
+    });
+}
+
+function atualizarDoomFire() {
+    for (const zoneState of fogoHazard.zoneStates) {
+        const { intensidades, colunas, linhas } = zoneState;
+        const intensidadeMax = fogoHazard.paleta.length - 1;
+        const intensidadeBase = Math.max(0, Math.min(intensidadeMax, fogoHazard.baseIntensity));
+
+        const linhaBase = (linhas - 1) * colunas;
+        for (let x = 0; x < colunas; x++) {
+            const variacao = Math.floor(Math.random() * 4);
+            const falha = Math.random() < 0.08;
+            intensidades[linhaBase + x] = falha ? 0 : Math.max(0, intensidadeBase - variacao);
+        }
+
+        for (let y = 1; y < linhas; y++) {
+            for (let x = 0; x < colunas; x++) {
+                const indiceAtual = (y * colunas) + x;
+                const intensidadeAtual = intensidades[indiceAtual];
+                if (intensidadeAtual === 0) continue;
+
+                const minDecay = Math.max(0, fogoHazard.minDecay);
+                const maxDecay = Math.max(minDecay, fogoHazard.maxDecay);
+                const perda = minDecay + Math.floor(Math.random() * ((maxDecay - minDecay) + 1));
+                const deslocamento = Math.floor(Math.random() * 3) - 1;
+                const destinoX = Math.max(0, Math.min(colunas - 1, x + deslocamento));
+                const destinoY = y - 1;
+                const destinoIndice = (destinoY * colunas) + destinoX;
+
+                intensidades[destinoIndice] = Math.max(intensidadeAtual - perda, 0);
+            }
+        }
+    }
+}
+
+function desenharTimerFogo(tempoAtual) {
+    if (!fogoHazard.enabled) return;
+
+    const tempoRestanteMs = fogoHazard.active
+        ? fogoHazard.desativaEm - tempoAtual
+        : fogoHazard.proximaAtivacao - tempoAtual;
+
+    const segundos = (Math.max(0, tempoRestanteMs) / 1000).toFixed(1);
+    const texto = fogoHazard.active
+        ? `🔥 FOGO ATIVO: ${segundos}s`
+        : `🔥 FOGO EM: ${segundos}s`;
+
+    ctx.save();
+    ctx.textAlign = 'right';
+    ctx.lineWidth = 3;
+    ctx.strokeStyle = 'black';
+    ctx.fillStyle = fogoHazard.active ? '#FF5A1F' : '#FFD54F';
+    ctx.font = '18px ArcadeFont';
+    ctx.strokeText(texto, canvas.width - 12, 30);
+    ctx.fillText(texto, canvas.width - 12, 30);
+    ctx.restore();
+}
+
+function jogadorEncostouNoFogo() {
+    if (!fogoHazard.enabled || !fogoHazard.active) return false;
+
+    const px = jogador.x;
+    const py = jogador.y;
+    const pw = jogador.largura;
+    const ph = jogador.altura;
+
+    for (const zone of fogoHazard.zones) {
+        const alturaContato = Math.max(12, fogoHazard.flameHeight + 8);
+        const hitboxFogo = {
+            x: zone.x,
+            y: zone.y - alturaContato,
+            width: zone.width,
+            height: alturaContato
+        };
+
+        const colidiu =
+            px < hitboxFogo.x + hitboxFogo.width &&
+            px + pw > hitboxFogo.x &&
+            py < hitboxFogo.y + hitboxFogo.height &&
+            py + ph > hitboxFogo.y;
+
+        if (colidiu) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 document.getElementById('btnRecarregar').addEventListener('click', () => {
@@ -156,6 +367,35 @@ let faseAtual = 0;
 let personagens = [];
 let mapa_lvl;
 let jogoPausado = false;
+let backgroundAtual = null;
+let fogoHazard = {
+    enabled: false,
+    active: false,
+    intervalMs: 10000,
+    durationMs: 5000,
+    flameHeight: 35,
+    pixelSize: 4,
+    baseIntensity: 28,
+    minDecay: 1,
+    maxDecay: 3,
+    drawThreshold: 2,
+    zones: [],
+    zoneStates: [],
+    proximaAtivacao: 0,
+    desativaEm: 0,
+    paleta: [
+        'rgba(7, 7, 7, 0)',
+        'rgb(31, 7, 7)', 'rgb(47, 15, 7)', 'rgb(71, 15, 7)', 'rgb(87, 23, 7)',
+        'rgb(103, 31, 7)', 'rgb(119, 31, 7)', 'rgb(143, 39, 7)', 'rgb(159, 47, 7)',
+        'rgb(175, 63, 7)', 'rgb(191, 71, 7)', 'rgb(199, 71, 7)', 'rgb(223, 79, 7)',
+        'rgb(223, 87, 7)', 'rgb(223, 87, 7)', 'rgb(215, 95, 7)', 'rgb(215, 95, 7)',
+        'rgb(215, 103, 15)', 'rgb(207, 111, 15)', 'rgb(207, 119, 15)', 'rgb(207, 127, 15)',
+        'rgb(207, 135, 23)', 'rgb(199, 135, 23)', 'rgb(199, 143, 23)', 'rgb(199, 151, 31)',
+        'rgb(191, 159, 31)', 'rgb(191, 159, 31)', 'rgb(191, 167, 39)', 'rgb(191, 167, 39)',
+        'rgb(191, 175, 47)', 'rgb(183, 175, 47)', 'rgb(183, 183, 47)', 'rgb(183, 183, 55)',
+        'rgb(207, 207, 111)', 'rgb(223, 223, 159)', 'rgb(239, 239, 199)', 'rgb(255, 255, 255)'
+    ]
+};
 
 // OTIMIZAÇÃO: Sistema de tempo melhorado
 let ultimoTempo = 0;
@@ -181,14 +421,13 @@ const dialogSystem = new DialogSystem();
 
 criandoGamePad();
 
-// Melhorado: Ignorar teclas quando pausado + suporte a setas
 window.addEventListener('keydown', (e) => {
-    if (jogoPausado) return; // Ignorar quando pausado
+    if (jogoPausado) return; 
 
     const key = e.key;
     switch (key) {
         case 'd':
-        case 'ArrowRight': // Suporte a setas
+        case 'ArrowRight':
             teclado.direita = true;
             break;
         case 'a':
@@ -204,7 +443,7 @@ window.addEventListener('keydown', (e) => {
             teclado.baixo = true;
             break;
         case ' ':
-            e.preventDefault(); // Prevenir scroll
+            e.preventDefault(); 
             teclado.espaco = true;
             break;
     }
@@ -240,31 +479,35 @@ iniciarFase(faseAtual);
 const tamanhoJogo = LEVELS.length;
 
 function gameLoop(tempoAtual) {
-    // OTIMIZAÇÃO: Calcular deltaTime com limitação
     let deltaTime = tempoAtual - ultimoTempo;
 
-    // Limitar para evitar saltos quando tab fica inativa (Linux)
     if (deltaTime > MAX_DELTA_TIME) {
         deltaTime = MAX_DELTA_TIME;
     }
 
-    // Se muito pequeno, pular frame
     if (deltaTime < 1) {
         requestAnimationFrame(gameLoop);
         return;
     }
 
     ultimoTempo = tempoAtual;
+    atualizarFogoHazard(tempoAtual);
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     colorirFundo();
     desenharPersonagens(deltaTime);
     mapa.desenharFase();
+    desenharFogoHazard();
 
-    // Só atualizar física se NÃO estiver pausado
     if (!jogoPausado) {
         mapa.verificarColisao(jogador);
+
+        if (jogadorEncostouNoFogo()) {
+            reiniciarFaseAtual();
+            requestAnimationFrame(gameLoop);
+            return;
+        }
 
         if (mapa.verificaFinal(jogador)) {
             if (personagensInteragidos === personagens.length) {
@@ -281,24 +524,19 @@ function gameLoop(tempoAtual) {
             }
         }
 
-        // Verificar interação com personagens
         personagens.forEach(personagem => {
             if (personagem.interagir(jogador)) {
                 personagensInteragidos++;
                 somInteracao.currentTime = 0;
-                somInteracao.play().catch(() => { }); // Evitar erro
+                somInteracao.play().catch(() => { }); 
                 console.log("Interagiu com personagem!");
-
-                // MELHORADO: Pausar E congelar
                 jogoPausado = true;
-                congelarJogador();
             }
         });
     }
 
     jogador.desenhar(deltaTime, DELTA_TIME_FIXO);
 
-    // Mostrar contador de personagens interagidos
     ctx.fillStyle = "white";
     ctx.strokeStyle = "black";
     ctx.lineWidth = 3;
@@ -306,7 +544,6 @@ function gameLoop(tempoAtual) {
     ctx.strokeText("PERSONAGENS: " + personagensInteragidos + "/" + personagens.length, 10, 30);
     ctx.fillText("PERSONAGENS: " + personagensInteragidos + "/" + personagens.length, 10, 30);
 
-    // Mostrar dica de como completar a fase
     if (personagensInteragidos < personagens.length) {
         ctx.fillStyle = "yellow";
         ctx.strokeStyle = "black";
@@ -326,6 +563,8 @@ function gameLoop(tempoAtual) {
         ctx.fillText("Vá para a saída! →", canvas.width / 2, 50);
         ctx.textAlign = "left";
     }
+
+    desenharTimerFogo(tempoAtual);
 
     requestAnimationFrame(gameLoop);
 }

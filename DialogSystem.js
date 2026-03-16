@@ -4,7 +4,34 @@ class DialogSystem {
         this.personagemAtual = null;
         this.falaAtual = 0;
         this.overlayElement = null;
+        this.paletaPadrao = {
+            primary: '#FF1493',
+            secondary: '#FF69B4',
+            surface: '#FFFFFF',
+            panel: '#FFF0F5',
+            text: '#333333',
+            accentText: '#FFFFFF',
+            chartGrid: '#ddd',
+            chartAxis: '#999',
+            chartFill: 'rgba(255, 105, 180, 0.4)',
+            chartStroke: '#FF69B4',
+            chartPoint: '#FF1493'
+        };
+        this.paletaAtual = { ...this.paletaPadrao };
         console.log('DialogSystem criado!');
+    }
+
+    aplicarPaleta(paleta = {}) {
+        const p = { ...this.paletaPadrao, ...paleta };
+        this.paletaAtual = p;
+        const root = document.documentElement;
+
+        root.style.setProperty('--dialog-primary', p.primary);
+        root.style.setProperty('--dialog-secondary', p.secondary);
+        root.style.setProperty('--dialog-surface', p.surface);
+        root.style.setProperty('--dialog-panel', p.panel);
+        root.style.setProperty('--dialog-text', p.text);
+        root.style.setProperty('--dialog-accent-text', p.accentText);
     }
 
     // Criar elementos DOM apenas quando necessário
@@ -214,8 +241,10 @@ class DialogSystem {
 
         console.log('Atributos:', labels, valores);
 
+        const tema = this.paletaAtual || this.paletaPadrao;
+
         // Desenhar linhas de fundo (grades)
-        ctx.strokeStyle = '#ddd';
+        ctx.strokeStyle = tema.chartGrid;
         ctx.lineWidth = 1;
 
         for (let nivel = 1; nivel <= 5; nivel++) {
@@ -237,7 +266,7 @@ class DialogSystem {
         }
 
         // Desenhar linhas dos eixos
-        ctx.strokeStyle = '#999';
+        ctx.strokeStyle = tema.chartAxis;
         for (let i = 0; i < numLados; i++) {
             const angulo = i * anguloStep - Math.PI / 2;
             const x = centerX + Math.cos(angulo) * raio;
@@ -281,17 +310,17 @@ class DialogSystem {
         }
         ctx.closePath();
 
-        // Preencher com cor rosa semi-transparente
-        ctx.fillStyle = 'rgba(255, 105, 180, 0.4)';
+        // Preencher área do radar
+        ctx.fillStyle = tema.chartFill;
         ctx.fill();
 
-        // Contorno rosa mais escuro
-        ctx.strokeStyle = '#FF69B4';
+        // Contorno
+        ctx.strokeStyle = tema.chartStroke;
         ctx.lineWidth = 2;
         ctx.stroke();
 
         // Desenhar pontos nos vértices
-        ctx.fillStyle = '#FF1493';
+        ctx.fillStyle = tema.chartPoint;
         for (let i = 0; i < numLados; i++) {
             const angulo = i * anguloStep - Math.PI / 2;
             const valor = valores[i] / 10;

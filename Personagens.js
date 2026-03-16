@@ -89,8 +89,75 @@ const PERSONAGENS = {
                 PAC: 10
             }
         }
+    },
+    GAYROTAS: {
+        NETURNA: {
+            assets: 'assets/2 Owlet_Monster/Owlet_Monster_Idle_4.png',
+            assetsZoom: 'assets/2 Owlet_Monster/Owlet_Monster_Idle_4.png',
+            falas: [
+                "Olá! Sou Neturna",
+                "Sou especialista em magias de água e gelo.",
+                "Minha força está na defesa e controle do campo de batalha.",
+            ],
+            atributos: {
+                CUR: 3,
+                DEB: 5,
+                DANO: 9,
+                UTI: 6,
+                PAC: 4
+            }
+        },
+        FLORIELLE: {
+            assets: 'assets/2 Owlet_Monster/Owlet_Monster_Idle_4.png',
+            assetsZoom: 'assets/2 Owlet_Monster/Owlet_Monster_Idle_4.png',
+            falas: [
+                "Olá! Sou Florielle",
+                "Sou especialista em magias de terra e natureza.",
+                "Minha força está na cura e suporte para meus aliados.",
+            ],
+            atributos: {
+                CUR: 3,
+                DEB: 5,
+                DANO: 9,
+                UTI: 6,
+                PAC: 4
+            }
+        },
+    },
+    DRAGOES: {
+        BARBADIOS: {
+            assets: 'assets/3 Dude_Monster/Dude_Monster_Idle_4.png',
+            assetsZoom: 'assets/3 Dude_Monster/Dude_Monster_Idle_4.png',
+            falas: [
+                "Eu sou Barbadios, o dragão mais feroz que já existiu!",
+                "Minha especialidade é a magia do fogo e da destruição.",
+                "Meu poder de dano é tão grande que pode destruir montanhas!",
+                "A paciência é algo que eu não tenho... mas quem precisa disso quando se tem poder?"
+            ],
+            atributos: {
+                CUR: 3,
+                DEB: 5,
+                DANO: 9,
+                UTI: 6,
+                PAC: 4
+            }
+        },
+        LILLORYS: {
+            assets: 'assets/3 Dude_Monster/Dude_Monster_Idle_4.png',
+            assetsZoom: 'assets/3 Dude_Monster/Dude_Monster_Idle_4.png',
+            falas: [
+                "Eu sou Lillorys, a dragonesa mais sábia e poderosa!",
+                "Sou a dragoa mais antiga e experiente desta terra, com conhecimento de todas as magias!",
+                "Minha utilidade é incomparável, posso curar, debuffar e causar dano com maestria!",
+                "A paciência é minha virtude, pois sei que a vitória vem para aqueles que esperam o momento certo!"
+            ],
+            atributos: {
+                CUR: 3,
+                DEB: 5,
+                DANO: 9,
+                UTI: 6,
+                PAC: 4
+            }
+        },
     }
 };
-
-// Personagens prontos para usar!
-// Acesse diretamente: PERSONAGENS['BRUXAS']['DOROTHY']
