@@ -235,6 +235,16 @@ function atualizarFogoHazard(tempoAtual) {
     }
 }
 
+function congelarTimerFogo(deltaTime) {
+    if (!fogoHazard.enabled) return;
+
+    fogoHazard.proximaAtivacao += deltaTime;
+
+    if (fogoHazard.active) {
+        fogoHazard.desativaEm += deltaTime;
+    }
+}
+
 function desenharFogoHazard() {
     if (!fogoHazard.enabled || !fogoHazard.active) return;
 
@@ -497,7 +507,12 @@ function gameLoop(tempoAtual) {
     }
 
     ultimoTempo = tempoAtual;
-    atualizarFogoHazard(tempoAtual);
+
+    if (jogoPausado) {
+        congelarTimerFogo(deltaTime);
+    } else {
+        atualizarFogoHazard(tempoAtual);
+    }
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
