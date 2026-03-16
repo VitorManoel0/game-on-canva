@@ -70,8 +70,14 @@ class Mapa {
                 jogador.velocidadeY >= 0) {
 
                 jogador.y = plataforma.y - jogador.altura;
-                jogador.velocidadeY = 0;
-                jogador.noChao = true;
+                if (plataforma.tipo === 87) {
+                    const forcaTrampolim = Math.abs(jogador.forcaPulo || 8) * 1.8;
+                    jogador.velocidadeY = -forcaTrampolim;
+                    jogador.noChao = false;
+                } else {
+                    jogador.velocidadeY = 0;
+                    jogador.noChao = true;
+                }
                 continue;
             }
 
@@ -123,5 +129,6 @@ class Mapa {
 
     }
 }
+
 
 
