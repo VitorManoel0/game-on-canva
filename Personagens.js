@@ -92,8 +92,8 @@ const PERSONAGENS = {
     },
     GAYROTAS: {
         NETURNA: {
-            assets: 'assets/2 Owlet_Monster/Owlet_Monster_Idle_4.png',
-            assetsZoom: 'assets/2 Owlet_Monster/Owlet_Monster_Idle_4.png',
+            assets: 'assets/neturna.png',
+            assetsZoom: 'assets/neturna_zoom.png',
             falas: [
                 "Olá! Sou Neturna",
                 "Sou especialista em magias de água e gelo.",
@@ -108,8 +108,8 @@ const PERSONAGENS = {
             }
         },
         FLORIELLE: {
-            assets: 'assets/2 Owlet_Monster/Owlet_Monster_Idle_4.png',
-            assetsZoom: 'assets/2 Owlet_Monster/Owlet_Monster_Idle_4.png',
+            assets: 'assets/florielle.png',
+            assetsZoom: 'assets/florielle_zoom.png',
             falas: [
                 "Olá! Sou Florielle",
                 "Sou especialista em magias de terra e natureza.",
