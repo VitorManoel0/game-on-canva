@@ -1,5 +1,5 @@
 class Personagem {
-    constructor(ctx, x, y, dados, nome, categoria) {
+    constructor(ctx, x, y, dados, nome, categoria, direcao = 1) {
         this.ctx = ctx;
         this.personagemImg = new Image();
         this.personagemImg.src = dados.assets;
@@ -10,6 +10,7 @@ class Personagem {
         this.dados = dados; // Dados completos do personagem (falas, atributos, etc)
         this.nome = nome;
         this.categoria = categoria;
+        this.direcao = direcao === -1 ? -1 : 1;
 
         // Configuração da animação
         this.frameAtual = 0;
@@ -75,14 +76,31 @@ class Personagem {
         const frameX = (this.frameAtual % this.totalFrames) * this.larguraTile;
         const frameY = Math.floor(this.frameAtual / this.totalFrames) * this.alturaTile;
 
-        this.ctx.drawImage(
-            this.personagemImg,
-            frameX, frameY,
-            this.larguraTile, this.alturaTile,
-            this.x, this.y,
-            this.larguraTile * this.escala,
-            this.alturaTile * this.escala
-        );
+        const larguraRender = this.larguraTile * this.escala;
+        const alturaRender = this.alturaTile * this.escala;
+
+        if (this.direcao === -1) {
+            this.ctx.scale(-1, 1);
+            this.ctx.drawImage(
+                this.personagemImg,
+                frameX, frameY,
+                this.larguraTile, this.alturaTile,
+                -this.x - larguraRender,
+                this.y,
+                larguraRender,
+                alturaRender
+            );
+        } else {
+            this.ctx.drawImage(
+                this.personagemImg,
+                frameX, frameY,
+                this.larguraTile, this.alturaTile,
+                this.x,
+                this.y,
+                larguraRender,
+                alturaRender
+            );
+        }
 
         // Se já interagiu, mostrar check mark
         if (this.interagido) {

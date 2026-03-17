@@ -37,13 +37,15 @@ const LEVELS = [
                 x: 480,
                 y: 125,
                 categoria: 'BRUXAS',
-                nome: 'DOROTHY'
+                nome: 'DOROTHY',
+                direcao: -1
             },
             {
                 x: 700,
                 y: 220,
                 categoria: 'BRUXAS',
-                nome: 'RITALIA'
+                nome: 'RITALIA',
+                direcao: -1
             },
         ],
     },
@@ -85,13 +87,15 @@ const LEVELS = [
                 x: 610,
                 y: 65,
                 categoria: 'GAYROTAS',
-                nome: 'NETURNA'
+                nome: 'NETURNA',
+                direcao: -1
             },
             {
                 x: 64,
                 y: 65,
                 categoria: 'GAYROTAS',
-                nome: 'FLORIELLE'
+                nome: 'FLORIELLE',
+                direcao: 1
             }
         ],
     },
@@ -147,13 +151,15 @@ const LEVELS = [
                 x: 740,
                 y: 192,
                 categoria: 'DRAGOES',
-                nome: 'BARBADIOS'
+                nome: 'BARBADIOS',
+                direcao: 1
             },
             {
                 x: 30,
                 y: 160,
                 categoria: 'DRAGOES',
-                nome: 'LILLORYS'
+                nome: 'LILLORYS',
+                direcao: 1
             }
         ],
     },

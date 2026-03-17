@@ -84,7 +84,13 @@ function carregaSons() {
 function iniciarFase(fase) {
     personagens = LEVELS[fase].personagens.map(p => {
         const dadosPersonagem = PERSONAGENS[p.categoria][p.nome];
-        return new Personagem(ctx, p.x, p.y, dadosPersonagem, p.nome, p.categoria);
+
+        let direcao = 1;
+        if (p.direcao === -1 || p.direcao === 'esquerda' || p.direcao === 'left') {
+            direcao = -1;
+        }
+
+        return new Personagem(ctx, p.x, p.y, dadosPersonagem, p.nome, p.categoria, direcao);
     });
 
     mapa_lvl = LEVELS[fase].mapa;

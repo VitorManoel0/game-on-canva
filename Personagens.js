@@ -2,8 +2,8 @@
 const PERSONAGENS = {
     BRUXAS: {
         DOROTHY: {
-            assets: 'assets/1 Pink_Monster/Pink_Monster_Idle_4.png',
-            assetsZoom: 'assets/1 Pink_Monster/Pink_Monster_Idle_4.png',
+            assets: 'assets/dorothy.png',
+            assetsZoom: 'assets/dorothy_zoom.png',
             falas: [
                 "Olá! Sou Dorothy, a bruxa mais poderosa desta terra!",
                 "Minha especialidade é a magia do fogo e do trovão.",
@@ -20,8 +20,8 @@ const PERSONAGENS = {
             }
         },
         RITALIA: {
-            assets: 'assets/1 Pink_Monster/Pink_Monster_Idle_4.png',
-            assetsZoom: 'assets/1 Pink_Monster/Pink_Monster_Idle_4.png',
+            assets: 'assets/ritalia.png',
+            assetsZoom: 'assets/ritalia_zoom.png',
             falas: [
                 "Ritalia é meu nome! Prazer em conhecê-lo!",
                 "Sou especialista em magias de cura e proteção.",
