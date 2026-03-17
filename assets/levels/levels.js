@@ -1,6 +1,6 @@
 const LEVELS = [
     {
-        background: 'ninebi-church-location.jpg',
+        background: 'assets/bruxas_cenario.jpg',
         dialogPalette: {
             primary: '#FF1493',
             secondary: '#FF69B4',
@@ -50,7 +50,7 @@ const LEVELS = [
         ],
     },
     {
-        background: '69393807345fb4a99e362c83d528f977.webp',
+        background: 'assets/gayrotas_cenario.webp',
         dialogPalette: {
             primary: '#054114',
             secondary: '#11cc2a',
@@ -100,7 +100,7 @@ const LEVELS = [
         ],
     },
     {
-        background: '95841bc1543fc45d0beca78638fb654b.jpg',
+        background: 'assets/dragoes_cenario.jpg',
         fireHazard: {
             enabled: true,
             intervalMs: 10000,
