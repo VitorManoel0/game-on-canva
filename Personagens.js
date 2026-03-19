@@ -126,8 +126,8 @@ const PERSONAGENS = {
     },
     DRAGOES: {
         BARBADIOS: {
-            assets: 'assets/3 Dude_Monster/Dude_Monster_Idle_4.png',
-            assetsZoom: 'assets/3 Dude_Monster/Dude_Monster_Idle_4.png',
+            assets: 'assets/dragon1.png',
+            assetsZoom: 'assets/dragon1_zoom.png',
             falas: [
                 "Eu sou Barbadios, o dragão mais feroz que já existiu!",
                 "Minha especialidade é a magia do fogo e da destruição.",
@@ -143,8 +143,8 @@ const PERSONAGENS = {
             }
         },
         LILLORYS: {
-            assets: 'assets/3 Dude_Monster/Dude_Monster_Idle_4.png',
-            assetsZoom: 'assets/3 Dude_Monster/Dude_Monster_Idle_4.png',
+            assets: 'assets/dragon2.png',
+            assetsZoom: 'assets/dragon2_zoom.png',
             falas: [
                 "Eu sou Lillorys, a dragonesa mais sábia e poderosa!",
                 "Sou a dragoa mais antiga e experiente desta terra, com conhecimento de todas as magias!",

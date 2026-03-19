@@ -32,6 +32,9 @@ class Jogador {
         this.gravidade = 0.4;
         this.forcaPulo = -8;
         this.noChao = false;
+        this.naAgua = false;
+        this.fatorGravidadeAgua = 0.18;
+        this.velocidadeMaxAfundando = 1.2;
         this.alturaChao = ctx.canvas.height - this.altura; // Posição do chão
 
         this.jogador = new Image();
@@ -40,7 +43,7 @@ class Jogador {
     }
 
     pular() {
-        if (this.noChao) {
+        if (this.noChao && !this.naAgua) {
             this.velocidadeY = this.forcaPulo;
             this.noChao = false;
             this.som.currentTime = 0;
@@ -49,7 +52,16 @@ class Jogador {
     }
 
     aplicarGravidade() {
-        this.velocidadeY += this.gravidade * this.deltaScale;
+        if (this.naAgua) {
+            this.noChao = false;
+            this.velocidadeY += (this.gravidade * this.fatorGravidadeAgua) * this.deltaScale;
+            if (this.velocidadeY > this.velocidadeMaxAfundando) {
+                this.velocidadeY = this.velocidadeMaxAfundando;
+            }
+        } else {
+            this.velocidadeY += this.gravidade * this.deltaScale;
+        }
+
         this.y += this.velocidadeY * this.deltaScale;
 
         if (this.y >= this.alturaChao) {
@@ -104,6 +116,17 @@ class Jogador {
 
     atualizar(deltaTime, deltaReferencia = this.deltaBase) {
         this.atualizarFrame(deltaTime, deltaReferencia);
+    }
+
+    entrarNaAgua() {
+        this.naAgua = true;
+        if (this.velocidadeY < 0) {
+            this.velocidadeY = 0;
+        }
+    }
+
+    sairDaAgua() {
+        this.naAgua = false;
     }
 
     mudaSprite() {

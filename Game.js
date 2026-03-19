@@ -129,12 +129,17 @@ function posicaoPadraoJogador() {
 function reiniciarFaseAtual() {
     personagensInteragidos = 0;
     jogoPausado = false;
+    morteNoFogo.ativa = false;
+    morteNoFogo.inicioMs = 0;
 
     teclado.cima = false;
     teclado.baixo = false;
     teclado.esquerda = false;
     teclado.direita = false;
     teclado.espaco = false;
+
+    jogador.sairDaAgua();
+    jogador.tempoNaAguaMs = 0;
 
     posicaoPadraoJogador();
     iniciarFase(faseAtual);
@@ -438,6 +443,13 @@ const jogador = new Jogador(ctx, teclado, somPulo);
 const mapa = new Mapa(ctx, 32, 32);
 let tileset = new Tileset("assets/brackeys_platformer_assets/sprites/world_tileset.png", 16, 16);
 let personagensInteragidos = 0;
+const TEMPO_ATE_MORTE_NA_AGUA_MS = 1400;
+const ATRASO_REINICIO_FOGO_MS = 1000;
+jogador.tempoNaAguaMs = 0;
+const morteNoFogo = {
+    ativa: false,
+    inicioMs: 0
+};
 
 const dialogSystem = new DialogSystem();
 
@@ -527,12 +539,45 @@ function gameLoop(tempoAtual) {
     mapa.desenharFase();
     desenharFogoHazard();
 
-    if (!jogoPausado) {
+    if (morteNoFogo.ativa) {
+        if ((tempoAtual - morteNoFogo.inicioMs) >= ATRASO_REINICIO_FOGO_MS) {
+            reiniciarFaseAtual();
+            requestAnimationFrame(gameLoop);
+            return;
+        }
+    }
+
+    if (!jogoPausado && !morteNoFogo.ativa) {
+        const estaNaAguaAntes = mapa.verificarAgua(jogador);
+        if (estaNaAguaAntes) {
+            jogador.entrarNaAgua();
+        } else {
+            jogador.sairDaAgua();
+        }
+
         jogador.atualizar(deltaTime, DELTA_TIME_FIXO);
         mapa.verificarColisao(jogador);
 
+        const estaNaAguaAgora = mapa.verificarAgua(jogador);
+        if (estaNaAguaAgora) {
+            jogador.entrarNaAgua();
+            jogador.tempoNaAguaMs += deltaTime;
+
+            if (jogador.tempoNaAguaMs >= TEMPO_ATE_MORTE_NA_AGUA_MS) {
+                reiniciarFaseAtual();
+                requestAnimationFrame(gameLoop);
+                return;
+            }
+        } else {
+            jogador.sairDaAgua();
+            jogador.tempoNaAguaMs = 0;
+        }
+
         if (jogadorEncostouNoFogo()) {
-            reiniciarFaseAtual();
+            morteNoFogo.ativa = true;
+            morteNoFogo.inicioMs = tempoAtual;
+            jogador.sairDaAgua();
+            jogador.tempoNaAguaMs = 0;
             requestAnimationFrame(gameLoop);
             return;
         }
@@ -563,7 +608,9 @@ function gameLoop(tempoAtual) {
         });
     }
 
-    jogador.desenhar();
+    if (!morteNoFogo.ativa) {
+        jogador.desenhar();
+    }
 
     ctx.fillStyle = "white";
     ctx.strokeStyle = "black";
