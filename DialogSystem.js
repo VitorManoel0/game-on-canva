@@ -216,6 +216,73 @@ class DialogSystem {
         }
     }
 
+    formatarLabelAtributo(texto) {
+        return String(texto || '')
+            .replaceAll('_', ' ')
+            .replace(/\s+/g, ' ')
+            .trim();
+    }
+
+    quebrarTextoCanvas(ctx, texto, larguraMaxima) {
+        const textoNormalizado = this.formatarLabelAtributo(texto);
+        const palavras = textoNormalizado.split(' ');
+
+        // Caso sem espaços (ex: "MISTERIOSA"), quebra por caracteres
+        if (palavras.length <= 1) {
+            const linhas = [];
+            let linhaAtual = '';
+
+            for (const char of textoNormalizado) {
+                const tentativa = linhaAtual + char;
+                if (ctx.measureText(tentativa).width > larguraMaxima && linhaAtual) {
+                    linhas.push(linhaAtual);
+                    linhaAtual = char;
+                } else {
+                    linhaAtual = tentativa;
+                }
+            }
+
+            if (linhaAtual) linhas.push(linhaAtual);
+            return linhas;
+        }
+
+        // Caso com espaços, quebra por palavras
+        const linhas = [];
+        let linhaAtual = '';
+
+        for (const palavra of palavras) {
+            const tentativa = linhaAtual ? `${linhaAtual} ${palavra}` : palavra;
+            if (ctx.measureText(tentativa).width > larguraMaxima && linhaAtual) {
+                linhas.push(linhaAtual);
+                linhaAtual = palavra;
+            } else {
+                linhaAtual = tentativa;
+            }
+        }
+
+        if (linhaAtual) linhas.push(linhaAtual);
+        return linhas;
+    }
+
+    desenharTextoQuebrado(ctx, texto, x, y, larguraMaxima, alturaLinha = 12, maxLinhas = 3) {
+        const linhas = this.quebrarTextoCanvas(ctx, texto, larguraMaxima);
+        const linhasFinais = linhas.slice(0, maxLinhas);
+
+        // Se ultrapassar o limite, adiciona reticências na última linha
+        if (linhas.length > maxLinhas) {
+            let ultimaLinha = linhasFinais[maxLinhas - 1];
+            while (ctx.measureText(`${ultimaLinha}…`).width > larguraMaxima && ultimaLinha.length > 1) {
+                ultimaLinha = ultimaLinha.slice(0, -1);
+            }
+            linhasFinais[maxLinhas - 1] = `${ultimaLinha}…`;
+        }
+
+        const offsetY = ((linhasFinais.length - 1) * alturaLinha) / 2;
+        linhasFinais.forEach((linha, index) => {
+            ctx.fillText(linha, x, y - offsetY + (index * alturaLinha));
+        });
+    }
+
     desenharRadarChart(atributos) {
         console.log('Desenhando radar chart com atributos:', atributos);
         
@@ -228,7 +295,7 @@ class DialogSystem {
         const ctx = canvas.getContext('2d');
         const centerX = canvas.width / 2;
         const centerY = canvas.height / 2;
-        const raio = 90;
+        const raio = 82;
 
         // Limpar canvas
         ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -278,18 +345,29 @@ class DialogSystem {
             ctx.stroke();
         }
 
-        // Desenhar labels
-        ctx.fillStyle = '#000';
-        ctx.font = 'bold 12px Arial';
+        // Desenhar labels (suporte para nomes longos)
+        ctx.fillStyle = tema.text || '#000';
+        ctx.font = 'bold 11px Arial';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
 
+        const distanciaLabel = raio + 24;
+        const larguraMaximaLabel = 78;
+
         for (let i = 0; i < numLados; i++) {
             const angulo = i * anguloStep - Math.PI / 2;
-            const x = centerX + Math.cos(angulo) * (raio + 25);
-            const y = centerY + Math.sin(angulo) * (raio + 25);
+            const x = centerX + Math.cos(angulo) * distanciaLabel;
+            const y = centerY + Math.sin(angulo) * distanciaLabel;
 
-            ctx.fillText(labels[i].toUpperCase(), x, y);
+            this.desenharTextoQuebrado(
+                ctx,
+                this.formatarLabelAtributo(labels[i]).toUpperCase(),
+                x,
+                y,
+                larguraMaximaLabel,
+                11,
+                3
+            );
         }
 
         // Desenhar área de atributos (preenchida)

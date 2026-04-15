@@ -6,17 +6,16 @@ const PERSONAGENS = {
             assetsZoom: 'assets/dorothy_zoom.png',
             falas: [
                 "Olá! Sou Dorothy, a bruxa mais poderosa desta terra!",
-                "Minha especialidade é a magia do fogo e do trovão.",
-                "Venha treinar comigo se você for corajoso o suficiente!",
-                "Cuidado! Meu poder de dano é devastador!",
-                "A paciência é uma virtude que eu ainda preciso desenvolver..."
+                "E uma das irmãs fundadoras desse coven",
+                "O COVEN DAS SOTUNAS !!!",
+                "ja a paciência é uma virtude que eu ainda preciso desenvolver...",
             ],
             atributos: {
-                CUR: 3,
-                DEB: 5,
-                DANO: 9,
-                UTI: 6,
-                PAC: 4
+                DANO_MÁGICO: 10,
+                UTILIDADE: 8,
+                PACIÊNCIA: 0,
+                DEBOCHE: 10,
+                CURA: 3,
             }
         },
         RITALIA: {
@@ -24,71 +23,18 @@ const PERSONAGENS = {
             assetsZoom: 'assets/ritalia_zoom.png',
             falas: [
                 "Ritalia é meu nome! Prazer em conhecê-lo!",
-                "Sou especialista em magias de cura e proteção.",
+                "Sou a outra irmã fundadora desse coven.",
                 "Meu objetivo é manter todos seguros e saudáveis.",
-                "Às vezes falta-me força ofensiva, mas compensa no suporte!",
-                "A utilidade é minha marca registrada!"
+                "E sempre que possível com uma taça de vinho na mão!",
             ],
             atributos: {
-                CUR: 10,
-                DEB: 3,
-                DANO: 2,
-                UTI: 9,
-                PAC: 8
+                DANO_MÁGICO: 5,
+                UTILIDADE: 8,
+                GOSTO_POR_VINHO: 10,
+                QUEBRAR_A_4º_PAREDE: 10,
+                CURA: 10,
             }
         },
-        CIRCY: {
-            assets: 'assets/1 Pink_Monster/Pink_Monster_Idle_4.png',
-            assetsZoom: 'assets/1 Pink_Monster/Pink_Monster_Idle_4.png',
-            falas: [
-                "Circy, mestra dos feitiços de controle!",
-                "Adoro enfraquecer meus inimigos antes do golpe final.",
-                "Minha paciência é infinita... assim como meus debuffs!",
-                "Não sou a mais forte, mas deixo todos fracos!"
-            ],
-            atributos: {
-                CUR: 4,
-                DEB: 10,
-                DANO: 5,
-                UTI: 7,
-                PAC: 9
-            }
-        },
-        CLAUDIA: {
-            assets: 'assets/1 Pink_Monster/Pink_Monster_Idle_4.png',
-            assetsZoom: 'assets/1 Pink_Monster/Pink_Monster_Idle_4.png',
-            falas: [
-                "Claudia, equilibrada em todas as artes!",
-                "Não sou a melhor em nada, mas sei fazer de tudo!",
-                "A versatilidade é minha maior força.",
-                "Posso curar, atacar, proteger... você decide!"
-            ],
-            atributos: {
-                CUR: 6,
-                DEB: 6,
-                DANO: 6,
-                UTI: 7,
-                PAC: 7
-            }
-        },
-        AGATHA: {
-            assets: 'assets/1 Pink_Monster/Pink_Monster_Idle_4.png',
-            assetsZoom: 'assets/1 Pink_Monster/Pink_Monster_Idle_4.png',
-            falas: [
-                "Agatha, a anciã sábia desta ordem.",
-                "Minha utilidade é incomparável após anos de estudo.",
-                "Posso não ser forte, mas conheço todos os segredos!",
-                "A paciência vem com a idade, jovem aprendiz.",
-                "Deixe-me guiá-lo pelo caminho da sabedoria."
-            ],
-            atributos: {
-                CUR: 7,
-                DEB: 4,
-                DANO: 3,
-                UTI: 10,
-                PAC: 10
-            }
-        }
     },
     GAYROTAS: {
         NETURNA: {
@@ -98,13 +44,14 @@ const PERSONAGENS = {
                 "Olá! Sou Neturna",
                 "Sou especialista em magias de água e gelo.",
                 "Minha força está na defesa e controle do campo de batalha.",
+                "E por hora, é apenas isso que você irá saber sobre mim... o mistério é minha maior arma!",
             ],
             atributos: {
-                CUR: 3,
-                DEB: 5,
-                DANO: 9,
-                UTI: 6,
-                PAC: 4
+                UTILIDADE: 9,
+                TIMIDEZ: 6,
+                DANO_MÁGICO: 9,
+                MISTERIOSA: 10,
+                CURA: 6,
             }
         },
         FLORIELLE: {
@@ -113,25 +60,25 @@ const PERSONAGENS = {
             falas: [
                 "Olá! Sou Florielle",
                 "Sou especialista em magias de terra e natureza.",
+                "Ainda estou me descobrindo, como uma gayrota",
                 "Minha força está na cura e suporte para meus aliados.",
             ],
             atributos: {
-                CUR: 3,
-                DEB: 5,
-                DANO: 9,
-                UTI: 6,
-                PAC: 4
+                QUER_UM_AMOR: 0,
+                UTILIDADE: 10,
+                DANO_MÁGICO: 8,
+                PERFORMATICA: 10,
+                CURA: 3,
             }
         },
     },
     DRAGOES: {
         BARBADIOS: {
-            assets: 'assets/dragon1.png',
-            assetsZoom: 'assets/dragon1_zoom.png',
+            assets: 'assets/dragon2.png',
+            assetsZoom: 'assets/dragon2_zoom.png',
             falas: [
                 "Eu sou Barbadios, o dragão mais feroz que já existiu!",
-                "Minha especialidade é a magia do fogo e da destruição.",
-                "Meu poder de dano é tão grande que pode destruir montanhas!",
+                "Meu poder é a palavra!",
                 "A paciência é algo que eu não tenho... mas quem precisa disso quando se tem poder?"
             ],
             atributos: {
@@ -143,13 +90,13 @@ const PERSONAGENS = {
             }
         },
         LILLORYS: {
-            assets: 'assets/dragon2.png',
-            assetsZoom: 'assets/dragon2_zoom.png',
+
+            assets: 'assets/dragon1.png',
+            assetsZoom: 'assets/dragon1_zoom.png',
             falas: [
-                "Eu sou Lillorys, a dragonesa mais sábia e poderosa!",
+                "Eu sou Lillorys, a Dragonesa mais sábia e poderosa!",
                 "Sou a dragoa mais antiga e experiente desta terra, com conhecimento de todas as magias!",
-                "Minha utilidade é incomparável, posso curar, debuffar e causar dano com maestria!",
-                "A paciência é minha virtude, pois sei que a vitória vem para aqueles que esperam o momento certo!"
+                "sou a progenitora de todos os dragões que existem e que há de existir!",
             ],
             atributos: {
                 CUR: 3,

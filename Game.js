@@ -459,7 +459,7 @@ window.addEventListener('keydown', (e) => {
     if (jogoPausado) return; 
 
     const key = e.key;
-    switch (key) {
+    switch (key.toLowerCase()) {
         case 'd':
         case 'ArrowRight':
             teclado.direita = true;
@@ -485,7 +485,7 @@ window.addEventListener('keydown', (e) => {
 
 window.addEventListener('keyup', (e) => {
     const key = e.key;
-    switch (key) {
+    switch (key.toLowerCase()) {
         case 'd':
         case 'ArrowRight':
             teclado.direita = false;
