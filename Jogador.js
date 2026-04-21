@@ -1,13 +1,20 @@
 sprites = {
-    idle: 'assets/1 Pink_Monster/Pink_Monster_Idle_4.png',
-    direita: 'assets/1 Pink_Monster/Pink_Monster_Run_6.png',
-    pulo: 'assets/1 Pink_Monster/Pink_Monster_Jump_8.png'
+    idle: 'assets/wizard/Idle.png',
+    direita: 'assets/wizard/Run.png',
+    pulo: 'assets/wizard/Jump.png'
 }
 
 class Jogador {
     constructor(ctx, teclado, som) {
         this.largura = 32;
         this.altura = 32;
+        this.escalaSprite = 2.8;
+        this.larguraDesenho = Math.round(this.largura * this.escalaSprite);
+        this.alturaDesenho = Math.round(this.altura * this.escalaSprite);
+        this.offsetDesenhoX = Math.round((this.largura - this.larguraDesenho) / 2);
+        this.offsetDesenhoY = (this.altura - this.alturaDesenho) + 25;
+        this.frameLargura = 231;
+        this.frameAltura = 190;
         this.ctx = ctx;
         this.teclado = teclado;
         this.x = 0;
@@ -20,9 +27,10 @@ class Jogador {
 
         // Configuração da animação
         this.frameAtual = 0;
-        this.totalFrames = 4;
+        this.totalFrames = 6;
         this.tempoFrame = 150;
         this.ultimoTempo = 0;
+        this.animacaoAtual = 'idle';
 
         // Direção do sprite
         this.direcao = 1;
@@ -40,6 +48,16 @@ class Jogador {
         this.jogador = new Image();
         this.jogador.src = sprites.idle;
         this.som = som;
+    }
+
+    definirAnimacao(animacao, totalFrames) {
+        if (this.animacaoAtual !== animacao) {
+            this.animacaoAtual = animacao;
+            this.jogador.src = sprites[animacao];
+            this.totalFrames = totalFrames;
+            this.frameAtual = 0;
+            this.ultimoTempo = 0;
+        }
     }
 
     pular() {
@@ -131,44 +149,33 @@ class Jogador {
 
     mudaSprite() {
         if (!this.noChao) {
-            if (this.jogador.src !== sprites.pulo) {
-                this.jogador.src = sprites.pulo;
-                this.totalFrames = 7;
-                if (this.teclado.esquerda) {
-                    this.direcao = -1;
-                }
-                if (this.teclado.direita) {
-                    this.direcao = 1;
-                }
+            this.definirAnimacao('pulo', 2);
+            if (this.teclado.esquerda) {
+                this.direcao = -1;
+            }
+            if (this.teclado.direita) {
+                this.direcao = 1;
             }
         }
         else if (this.teclado.direita) {
-            if (this.jogador.src !== sprites.direita) {
-                this.direcao = 1;
-                this.jogador.src = sprites.direita;
-                this.totalFrames = 6;
-            }
+            this.definirAnimacao('direita', 8);
             this.direcao = 1;
         }
         else if (this.teclado.esquerda) {
-            if (this.jogador.src !== sprites.direita) {
-                this.jogador.src = sprites.direita;
-                this.totalFrames = 6;
-            }
+            this.definirAnimacao('direita', 8);
             this.direcao = -1;
         }
         else {
-            if (this.jogador.src !== sprites.idle) {
-                this.jogador.src = sprites.idle;
-                this.totalFrames = 4;
-            }
+            this.definirAnimacao('idle', 6);
         }
     }
 
     desenhar() {
         this.ctx.save();
 
-        let posIniX = this.largura * this.frameAtual;
+        let posIniX = this.frameLargura * this.frameAtual;
+        const destinoX = this.x + this.offsetDesenhoX;
+        const destinoY = this.y + this.offsetDesenhoY;
 
         if (this.direcao === -1) {
             // Espelha horizontalmente
@@ -176,18 +183,18 @@ class Jogador {
             this.ctx.drawImage(
                 this.jogador,
                 posIniX, 0,
-                this.largura, this.altura,
-                -this.x - this.largura, this.y, // Inverte a posição X
-                this.largura, this.altura
+                this.frameLargura, this.frameAltura,
+                -destinoX - this.larguraDesenho, destinoY, // Inverte a posição X
+                this.larguraDesenho, this.alturaDesenho
             );
         } else {
 
             this.ctx.drawImage(
                 this.jogador,
                 posIniX, 0,                 // posição no sprite sheet
-                this.largura, this.altura, // tamanho do recorte
-                this.x, this.y,            // posição no canvas
-                this.largura, this.altura  // tamanho de exibição
+                this.frameLargura, this.frameAltura, // tamanho do recorte
+                destinoX, destinoY,            // posição no canvas
+                this.larguraDesenho, this.alturaDesenho  // tamanho de exibição
             );
         }
         this.ctx.restore();
