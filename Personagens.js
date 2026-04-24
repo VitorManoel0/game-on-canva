@@ -7,14 +7,14 @@ const PERSONAGENS = {
             falas: [
                 "Olá! Sou Dorothy, a bruxa mais poderosa desta terra!",
                 "E uma das irmãs fundadoras desse coven",
-                "O COVEN DAS SOTUNAS !!!",
+                "O COVEN DAS SOTURNAS !!!",
                 "ja a paciência é uma virtude que eu ainda preciso desenvolver...",
             ],
             atributos: {
-                DANO_MÁGICO: 10,
-                UTILIDADE: 8,
-                PACIÊNCIA: 0,
                 DEBOCHE: 10,
+                DANO_MÁGICO: 10,
+                PACIÊNCIA: 0,
+                UTILIDADE: 8,
                 CURA: 3,
             }
         },
@@ -24,7 +24,7 @@ const PERSONAGENS = {
             falas: [
                 "Ritalia é meu nome! Prazer em conhecê-lo!",
                 "Sou a outra irmã fundadora desse coven.",
-                "Meu objetivo é manter todos seguros e saudáveis.",
+                "Meu objetivo é manter todes seguros e saudáveis.",
                 "E sempre que possível com uma taça de vinho na mão!",
             ],
             atributos: {
@@ -61,7 +61,7 @@ const PERSONAGENS = {
                 "Olá! Sou Florielle",
                 "Sou especialista em magias de terra e natureza.",
                 "Ainda estou me descobrindo, como uma gayrota",
-                "Minha força está na cura e suporte para meus aliados.",
+                "Minha força está na cura e suporte para meus aliades.",
             ],
             atributos: {
                 QUER_UM_AMOR: 0,
